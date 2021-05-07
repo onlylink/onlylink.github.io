@@ -2,25 +2,22 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>关于 | onlylink</title>
+<title>ldap对接grafana | onlylink</title>
 <link rel="shortcut icon" href="https://onlylink.github.io/favicon.ico?v=1620384365766">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
 <link rel="stylesheet" href="https://onlylink.github.io/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="关于 | onlylink - Atom Feed" href="https://onlylink.github.io/atom.xml">
+<link rel="alternate" type="application/atom+xml" title="ldap对接grafana | onlylink - Atom Feed" href="https://onlylink.github.io/atom.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
 
 
 
-    <meta name="description" content="
-欢迎来到我的小站呀，很高兴遇见你！🤝
+    <meta name="description" content="在 grafana 主配置文件启用 ldap
+主配置文件默认路径为 /etc/grafana/grafana.ini
 
-🏠 关于本站
-Powered by Gridea
-🤡 博主是谁
-⛹ 兴趣爱好
-📬 联系我呀
-..." />
-    <meta name="keywords" content="" />
+[auth.ldap]
+enabled = true
+config_file = /etc/grafana/ldap.t..." />
+    <meta name="keywords" content="cloudnative" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
     <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
@@ -82,42 +79,74 @@ Powered by Gridea
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              关于
+              ldap对接grafana
             </h2>
             <div class="post-info">
               <span>
-                2019-01-25
+                2021-05-07
               </span>
               <span>
-                1 min read
+                2 min read
               </span>
+              
+                <a href="https://onlylink.github.io/tag/wWH5qgfdK/" class="post-tag">
+                  # cloudnative
+                </a>
               
             </div>
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <blockquote>
-<p>欢迎来到我的小站呀，很高兴遇见你！🤝</p>
-</blockquote>
-<h2 id="关于本站">🏠 关于本站</h2>
-<p>Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a></p>
-<h2 id="博主是谁">🤡 博主是谁</h2>
-<h2 id="兴趣爱好">⛹ 兴趣爱好</h2>
-<h2 id="联系我呀">📬 联系我呀</h2>
+                <p>在 grafana 主配置文件启用 ldap<br>
+主配置文件默认路径为 /etc/grafana/grafana.ini</p>
+<!-- more -->
+<pre><code>[auth.ldap]
+enabled = true
+config_file = /etc/grafana/ldap.toml
+allow_sign_up = true
+</code></pre>
+<p>根据指定的 ldap 配置文件路径创建相应的 ldap 配置文件</p>
+<pre><code>[[servers]]
+host = &quot;ldap.hyperchain.cn&quot; #ldap服务器地址
+port = 389
+use_ssl = false
+start_tls = false
+ssl_skip_verify = false
+
+bind_dn = &quot;uid=alpha,ou=infra,ou=People,dc=hyperchain,dc=cn
+&quot;
+bind_password = 'hyperchain'
+search_filter = &quot;(cn=%s)&quot;
+search_base_dns = [&quot;dc=hyperchain,dc=cn&quot;]
+
+[servers.attributes]
+#name = &quot;displayName&quot;  #对接的ldap无displayName属性，不注释也行；但不能改为cn或uid或sn 否则grafana用户会显示异常
+surname = &quot;sn&quot;  #与name 二选一注释，
+username = &quot;cn&quot;
+member_of = &quot;memberOf&quot;
+email =  &quot;mail&quot;        #取决于对接的ldap邮件是mail还是email
+
+[[servers.group_mappings]]
+group_dn = &quot;cn=infra,ou=group,dc=hyperchain,dc=cn&quot;
+org_role = &quot;Admin&quot;
+
+[[servers.group_mappings]]
+group_dn = &quot;cn=grafana,ou=group,dc=hyperchain,dc=cn&quot;
+org_role = &quot;Editor&quot;
+
+[[servers.group_mappings]]
+group_dn = &quot;*&quot;
+org_role = &quot;Viewer&quot;
+</code></pre>
+<p>使用了memberOf 来划分权限，支持多个组，按照格式往下写即可<br>
+重启 grafana server 服务器即可<br>
+systemctl restart grafana-server<br>
+对接后原 admin 用户，仍然可以继续登录使用，但更改 ldap 用户权限，删除 ldap 用户操作均不生效（操作可执行）</p>
+<!-- more -->
 
               </div>
               <div class="toc-container">
-                <ul class="markdownIt-TOC">
-<li>
-<ul>
-<li><a href="#%E5%85%B3%E4%BA%8E%E6%9C%AC%E7%AB%99">🏠 关于本站</a></li>
-<li><a href="#%E5%8D%9A%E4%B8%BB%E6%98%AF%E8%B0%81">🤡 博主是谁</a></li>
-<li><a href="#%E5%85%B4%E8%B6%A3%E7%88%B1%E5%A5%BD">⛹ 兴趣爱好</a></li>
-<li><a href="#%E8%81%94%E7%B3%BB%E6%88%91%E5%91%80">📬 联系我呀</a></li>
-</ul>
-</li>
-</ul>
-
+                
               </div>
             </div>
           </article>
