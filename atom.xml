@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://onlylink.github.io</id>
     <title>Gridea</title>
-    <updated>2021-05-07T07:09:47.809Z</updated>
+    <updated>2021-05-07T07:22:19.658Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://onlylink.github.io"/>
     <link rel="self" href="https://onlylink.github.io/atom.xml"/>
@@ -10,6 +10,63 @@
     <logo>https://onlylink.github.io/images/avatar.png</logo>
     <icon>https://onlylink.github.io/favicon.ico</icon>
     <rights>All rights reserved 2021, Gridea</rights>
+    <entry>
+        <title type="html"><![CDATA[ldap对接grafana]]></title>
+        <id>https://onlylink.github.io/post/ldap-dui-jie-grafana/</id>
+        <link href="https://onlylink.github.io/post/ldap-dui-jie-grafana/">
+        </link>
+        <updated>2021-05-07T07:19:31.000Z</updated>
+        <summary type="html"><![CDATA[<p>在 grafana 主配置文件启用 ldap<br>
+主配置文件默认路径为 /etc/grafana/grafana.ini</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>在 grafana 主配置文件启用 ldap<br>
+主配置文件默认路径为 /etc/grafana/grafana.ini</p>
+<!-- more -->
+<pre><code>[auth.ldap]
+enabled = true
+config_file = /etc/grafana/ldap.toml
+allow_sign_up = true
+</code></pre>
+<p>根据指定的 ldap 配置文件路径创建相应的 ldap 配置文件</p>
+<pre><code>[[servers]]
+host = &quot;ldap.hyperchain.cn&quot; #ldap服务器地址
+port = 389
+use_ssl = false
+start_tls = false
+ssl_skip_verify = false
+
+bind_dn = &quot;uid=alpha,ou=infra,ou=People,dc=hyperchain,dc=cn
+&quot;
+bind_password = 'hyperchain'
+search_filter = &quot;(cn=%s)&quot;
+search_base_dns = [&quot;dc=hyperchain,dc=cn&quot;]
+
+[servers.attributes]
+#name = &quot;displayName&quot;  #对接的ldap无displayName属性，不注释也行；但不能改为cn或uid或sn 否则grafana用户会显示异常
+surname = &quot;sn&quot;  #与name 二选一注释，
+username = &quot;cn&quot;
+member_of = &quot;memberOf&quot;
+email =  &quot;mail&quot;        #取决于对接的ldap邮件是mail还是email
+
+[[servers.group_mappings]]
+group_dn = &quot;cn=infra,ou=group,dc=hyperchain,dc=cn&quot;
+org_role = &quot;Admin&quot;
+
+[[servers.group_mappings]]
+group_dn = &quot;cn=grafana,ou=group,dc=hyperchain,dc=cn&quot;
+org_role = &quot;Editor&quot;
+
+[[servers.group_mappings]]
+group_dn = &quot;*&quot;
+org_role = &quot;Viewer&quot;
+</code></pre>
+<p>使用了memberOf 来划分权限，支持多个组，按照格式往下写即可<br>
+重启 grafana server 服务器即可<br>
+systemctl restart grafana-server<br>
+对接后原 admin 用户，仍然可以继续登录使用，但更改 ldap 用户权限，删除 ldap 用户操作均不生效（操作可执行）</p>
+<!-- more -->
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Hello Gridea]]></title>
         <id>https://onlylink.github.io/post/hello-gridea/</id>
